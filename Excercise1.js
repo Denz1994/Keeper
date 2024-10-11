@@ -88,25 +88,25 @@ const getLowestTotalExpenditure = (customerReport) => {
             customerIds.push(id);
         }
     }
-    
-    return { "Customer Ids": customerIds, "Max Expenditure": minExpenditure };
+    minExpenditure = minExpenditure === Infinity ? 0 : minExpenditure;
+    return { "Customer Ids": customerIds, "Lowest Expenditure": minExpenditure };
 }
 
 const getHighestProductQuantitySold = (productReport) =>{
     let maxUnitsSold = 0;
-    let customerIds = [];
+    let productIds = [];
 
     for (const [id, unitsSold] of Object.entries(productReport)){
         if (unitsSold > maxUnitsSold){
-            customerIds = [id];
+            productIds = [id];
             maxUnitsSold = unitsSold;
         }
         else if (unitsSold === maxUnitsSold){
-            customerIds.push(id);
+            productIds.push(id);
         }
     }
     
-    return { "Customer Ids": customerIds, "Max Expenditure": maxUnitsSold };
+    return { "Product Ids": productIds, "Max Units Sold": maxUnitsSold };
 }
 
 const processTransactions = (transactionArray)=>{
@@ -192,6 +192,7 @@ const main = ()=>{
         {customerId: 'C111', productId:'P2', quantity:2, pricePerUnit:50},
         
         {customerId:'C5555', productId:'P6', quantity:8, pricePerUnit:50}, 
+        
         {customerId:'C5555', productId:'P7', quantity:9, pricePerUnit:50}, 
 
 
