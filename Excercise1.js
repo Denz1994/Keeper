@@ -1,3 +1,16 @@
+/*
+
+Notes:
+- Reports are reused to calculate min and max values
+- Anonymization function is rudimentary and shouldn't be used in production
+- Todos added as personal notes and places for improvement
+
+Tools used:
+- Development: javascript, vscode, vscode debugger, and terminal
+- References: MDN Docs
+ 
+ */
+
 const isNullish = (value)=>{
     return value === '' || null || undefined;
 }
@@ -26,6 +39,20 @@ const getCustomerExpenditureReport = (transactions) => {
             expenditureReport[transaction.anonymizedCustomerId] += expenditure;
         } else{
             expenditureReport[transaction.anonymizedCustomerId] = expenditure;
+        }
+    }
+    return expenditureReport;
+}
+const getProductExpenditureReport = (transactions) => {
+    // {customerID: totalExpenditure}
+    let expenditureReport = {};
+
+    for(transaction of transactions){
+        
+        if (transaction.anonymizedProductId in expenditureReport){
+            expenditureReport[transaction.anonymizedProductId] += transaction.quantity;
+        } else{
+            expenditureReport[transaction.anonymizedProductId] = transaction.quantity;
         }
     }
     return expenditureReport;
@@ -65,6 +92,23 @@ const getLowestTotalExpenditure = (customerReport) => {
     return { "Customer Ids": customerIds, "Max Expenditure": minExpenditure };
 }
 
+const getHighestProductQuantitySold = (productReport) =>{
+    let maxUnitsSold = 0;
+    let customerIds = [];
+
+    for (const [id, unitsSold] of Object.entries(productReport)){
+        if (unitsSold > maxUnitsSold){
+            customerIds = [id];
+            maxUnitsSold = unitsSold;
+        }
+        else if (unitsSold === maxUnitsSold){
+            customerIds.push(id);
+        }
+    }
+    
+    return { "Customer Ids": customerIds, "Max Expenditure": maxUnitsSold };
+}
+
 const processTransactions = (transactionArray)=>{
     if (!Array.isArray(transactionArray)){
         throw new TypeError("TransactionArray is not of type Array."); 
@@ -88,7 +132,6 @@ const processTransactions = (transactionArray)=>{
     // Operation 2
     const customerExpenditureReport = getCustomerExpenditureReport(transactionArray);
     console.info('\nCUSTOMER EXPENDITURE REPORT\n');
-    // Todo: Format column headers? ids and value
     console.table(customerExpenditureReport)
     console.info('\n==========================================================\n');
 
@@ -96,7 +139,6 @@ const processTransactions = (transactionArray)=>{
     // Operation 3
     const highestTotalExpenditure = getHighestTotalExpenditure(customerExpenditureReport);
     console.info('\nHIGHEST TOTAL EXPENDITURE\n');
-    // Todo: Format column headers? ids and value
     console.table(highestTotalExpenditure);
     console.info('\n==========================================================\n');
 
@@ -104,8 +146,17 @@ const processTransactions = (transactionArray)=>{
     // Operation 4
     const lowestTotalExpenditure = getLowestTotalExpenditure(customerExpenditureReport);
     console.info('\nLOWEST TOTAL EXPENDITURE\n');
-    // Todo: Format column headers? ids and value
     console.table(lowestTotalExpenditure);
+    console.info('\n==========================================================\n');
+
+    // Operation 5
+    const productExpenditureReport = getProductExpenditureReport(transactionArray);
+    console.info('\nPRODUCT EXPENDITURE REPORT\n');
+    console.table(productExpenditureReport);
+
+    const highestProductQuantitySold = getHighestProductQuantitySold(productExpenditureReport);
+    console.info('\nHIGHEST PRODUCT QUANTITY SOLD\n');
+    console.table(highestProductQuantitySold);
     console.info('\n==========================================================\n');
 
 }
@@ -141,6 +192,8 @@ const main = ()=>{
         {customerId: 'C111', productId:'P2', quantity:2, pricePerUnit:50},
         
         {customerId:'C5555', productId:'P6', quantity:8, pricePerUnit:50}, 
+        {customerId:'C5555', productId:'P7', quantity:9, pricePerUnit:50}, 
+
 
     ]
     // Used for testing
