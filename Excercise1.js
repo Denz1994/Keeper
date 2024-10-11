@@ -9,6 +9,9 @@ Tools used:
 - Development: javascript, vscode, vscode debugger, and terminal
 - References: MDN Docs
  
+
+Question:
+- Is the example test case wrong? "Total expenditure of each anonymized customer:  ID_1: $550" 
  */
 
 const isNullish = (value)=>{
@@ -192,7 +195,7 @@ const main = ()=>{
         {customerId: 'C111', productId:'P2', quantity:2, pricePerUnit:50},
         
         {customerId:'C5555', productId:'P6', quantity:8, pricePerUnit:50}, 
-        
+
         {customerId:'C5555', productId:'P7', quantity:9, pricePerUnit:50}, 
 
 
