@@ -22,15 +22,48 @@ const getCustomerExpenditureReport = (transactions) => {
 
     for(transaction of transactions){
         let expenditure = transaction.pricePerUnit * transaction.quantity;
-        if (transaction.customerId in expenditureReport){
-            expenditureReport[transaction.customerId] += expenditure;
+        if (transaction.anonymizedCustomerId in expenditureReport){
+            expenditureReport[transaction.anonymizedCustomerId] += expenditure;
         } else{
-            expenditureReport[transaction.customerId] = expenditure;
+            expenditureReport[transaction.anonymizedCustomerId] = expenditure;
         }
     }
     return expenditureReport;
 }
 
+const getHighestTotalExpenditure = (customerReport) => {
+    let maxExpenditure = 0;
+    let customerIds = [];
+
+    for (const [id, expenditure] of Object.entries(customerReport)){
+        if (expenditure > maxExpenditure){
+            customerIds = [id];
+            maxExpenditure = expenditure;
+        }
+        else if (expenditure === maxExpenditure){
+            customerIds.push(id);
+        }
+    }
+    
+    return { "Customer Ids": customerIds, "Max Expenditure": maxExpenditure };
+}
+
+const getLowestTotalExpenditure = (customerReport) => {
+    let minExpenditure = Infinity;
+    let customerIds = [];
+
+    for (const [id, expenditure] of Object.entries(customerReport)){
+        if (expenditure < minExpenditure){
+            customerIds = [id];
+            minExpenditure = expenditure;
+        }
+        else if (expenditure === minExpenditure){
+            customerIds.push(id);
+        }
+    }
+    
+    return { "Customer Ids": customerIds, "Max Expenditure": minExpenditure };
+}
 
 const processTransactions = (transactionArray)=>{
     if (!Array.isArray(transactionArray)){
@@ -41,9 +74,15 @@ const processTransactions = (transactionArray)=>{
     }
       
     // Operation 1
+    // {customerId:anonymizedId} -> Used to store duplicate customer transactions. We need a way to track customerIds to avoid anonymizing the same customerId.
+    const anonymizedCustomerIds = {};
+    const anonymizedProductIds = {};
     for(let transaction of transactionArray){
         validateTransaction(transaction);
-        transaction = anonymizeTransaction(transaction);
+        // This works because we handle null values in anonymizeTransaction. So if the anonymized*Id value doesn't exist in our objects, then we generate one in the function. 
+        transaction = anonymizeTransaction(anonymizedCustomerIds[transaction.customerId], anonymizedProductIds[transaction.productId], transaction);
+        anonymizedCustomerIds[transaction.customerId] =transaction.anonymizedCustomerId;
+        anonymizedProductIds[transaction.productId] = transaction.anonymizedProductId;
     }
     
     // Operation 2
@@ -51,6 +90,24 @@ const processTransactions = (transactionArray)=>{
     console.info('\nCUSTOMER EXPENDITURE REPORT\n');
     // Todo: Format column headers? ids and value
     console.table(customerExpenditureReport)
+    console.info('\n==========================================================\n');
+
+
+    // Operation 3
+    const highestTotalExpenditure = getHighestTotalExpenditure(customerExpenditureReport);
+    console.info('\nHIGHEST TOTAL EXPENDITURE\n');
+    // Todo: Format column headers? ids and value
+    console.table(highestTotalExpenditure);
+    console.info('\n==========================================================\n');
+
+
+    // Operation 4
+    const lowestTotalExpenditure = getLowestTotalExpenditure(customerExpenditureReport);
+    console.info('\nLOWEST TOTAL EXPENDITURE\n');
+    // Todo: Format column headers? ids and value
+    console.table(lowestTotalExpenditure);
+    console.info('\n==========================================================\n');
+
 }
 // Todo: Use UUIDs? Salting hash function? 
 const buildMask = (originalId)=>{
@@ -61,42 +118,44 @@ const buildMask = (originalId)=>{
     return maskedId;
 }
 
-const anonymizeTransaction = (transaction)=>{
-    const anonymizedCustomerId = buildMask(transaction.customerId);
-    const anonymizedProductId = buildMask(transaction.productId);
-    transaction.customerId = anonymizedCustomerId;
-    transaction.productId = anonymizedProductId;
+// TODO: Function signature can get out of hand quickly. Spread operator or object comparator?
+const anonymizeTransaction = (previouslyAnonymizedCustomerId, previouslyAnonymizedProductId, transaction)=>{
+    // We escape building a mask for our ids if one already exists.
+    const anonymizedCustomerId = previouslyAnonymizedCustomerId || buildMask(transaction.customerId);
+    const anonymizedProductId =  previouslyAnonymizedProductId || buildMask(transaction.productId);
+    transaction.anonymizedCustomerId = anonymizedCustomerId;
+    transaction.anonymizedProductId = anonymizedProductId;
     return transaction;
 }
 const main = ()=>{
     // Todo: transaction builder
     const transactions = [ 
-
         {customerId:'C111', productId:'P1', quantity:3, pricePerUnit:100}, 
-      
+        
         {customerId:'C2222', productId:'P2', quantity:2, pricePerUnit:50}, 
-      
+        
         {customerId:'C3333', productId:'P3', quantity:1, pricePerUnit:200}, 
-      
+        
         {customerId:'C4444', productId:'P2', quantity:5, pricePerUnit:50}, 
-      
+        
+        {customerId: 'C111', productId:'P2', quantity:2, pricePerUnit:50},
+        
+        {customerId:'C5555', productId:'P6', quantity:8, pricePerUnit:50}, 
+
+    ]
+    // Used for testing
+    const brokenTransactions = [
+        { productId:'P1', quantity:3, pricePerUnit:100}, 
+        
+        {customerId:'C2222', quantity:2, pricePerUnit:50}, 
+        
+        {customerId:'C3333', productId:'P3',  pricePerUnit:200}, 
+        
+        {customerId:'C4444', productId:'P2', quantity:5}, 
+        
         {customerId: 'C111', productId:'P2', quantity:2, pricePerUnit:50} 
-      
-      ]
-      // Used for testing
-      const brokenTransactions = [
-            { productId:'P1', quantity:3, pricePerUnit:100}, 
-          
-            {customerId:'C2222', quantity:2, pricePerUnit:50}, 
-          
-            {customerId:'C3333', productId:'P3',  pricePerUnit:200}, 
-          
-            {customerId:'C4444', productId:'P2', quantity:5}, 
-          
-            {customerId: 'C111', productId:'P2', quantity:2, pricePerUnit:50} 
-          
-      ] 
-      processTransactions(transactions)
+    ] 
+    processTransactions(transactions)
 }
 
 main();
