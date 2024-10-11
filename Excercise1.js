@@ -12,7 +12,7 @@ Tools used:
  */
 
 const isNullish = (value)=>{
-    return value === '' || null || undefined;
+    return value === '' || value === null || value === undefined;
 }
 
 const validateTransaction = (transaction)=>{
