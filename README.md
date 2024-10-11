@@ -7,16 +7,16 @@ You are given a list of transactions representing purchases made by customers in
 Write a function to perform the following operations: 
 
 
+ 
+ 1) Implement a data transformation function that anonymizes customer IDs and product IDs, replacing them with randomly generated identifiers. 
 
- Implement a data transformation function that anonymizes customer IDs and product IDs, replacing them with randomly generated identifiers. 
+  2) Calculate the total expenditure of each customer without revealing their original IDs. 
 
-  Calculate the total expenditure of each customer without revealing their original IDs. 
+  3) Implement a function to find the customer(s) with the highest total expenditure without disclosing their original IDs. 
 
-  Implement a function to find the customer(s) with the highest total expenditure without disclosing their original IDs. 
+  4) Implement a function to find the customer(s) with the lowest total expenditure without disclosing their original IDs. 
 
-  Implement a function to find the customer(s) with the lowest total expenditure without disclosing their original IDs. 
-
-Implement a function to find the products(s) with the highest quantity sold without disclosing their original IDs. 
+5) Implement a function to find the products(s) with the highest quantity sold without disclosing their original IDs. 
 
 
 
