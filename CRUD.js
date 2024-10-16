@@ -2,8 +2,7 @@
  * Notes:
   - Hard coded score array and mutated the array as suggested by the prompt
   - Validation is bundled at top of scoreMutation but could be separated out if desired
-
-    Question: Why is id parameter necessary for creates if we always set the id to max + 1.
+  - Why is id parameter necessary for creates if we always set the id to max + 1.
  */
 
 const isNullish = (value)=>{
